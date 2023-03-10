@@ -1,5 +1,5 @@
 <?php
-dd(123);
+
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
