@@ -27,6 +27,7 @@ services:
       - redis
     volumes:
       - .:/var/data
+      - ./rs_api:/srv/projects/rs_api
       - ./data/logs/php:/var/log/php-fpm
     working_dir: /var/data
     container_name: "docker_app_php"
@@ -41,7 +42,9 @@ services:
     volumes:
       - ./docker/web/conf/default.conf:/etc/nginx/conf.d/default.conf
       - ./docker/web/conf/web.conf:/etc/nginx/conf.d/web.conf
+      - ./docker/web/conf/rs_api.conf:/etc/nginx/conf.d/rs_api.conf
       - .:/var/data
+      - ./rs_api:/srv/projects/rs_api
       - ./data/logs/nginx:/var/log/nginx
     container_name: "docker_app_nginx"
 
