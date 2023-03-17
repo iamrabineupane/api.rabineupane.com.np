@@ -2,29 +2,29 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use Illuminate\Http\Request;
 use App\Models\Api\V1\UserPassword;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Crypt;
-use App\Http\Resources\Api\V1\UserPassword\ListResource;
+use App\Http\Controllers\AbstractApiController;
+use App\Http\Requests\Api\V1\PasswordCreateRequest;
 
-class UserPasswordController extends Controller
+class UserPasswordController extends AbstractApiController
 {
     const PAGE_SIZE_DEFAULT = 30;
 
+
     /**
-     * @param Request $request
-     * @param Bool $forRss
-     * 
      * @return [type]
      */
-    public function index(Request $request, Bool $forRss = false)
+    public function index()
     {
-        $password = UserPassword::paginate(10);
-        ListResource::collection($password);
-        return response()->json([
-            'password' => $password,
-        ]);
+        if (auth()->check()) {
+            $auth = auth('api');
+            $user = $auth->user();
+            $password = UserPassword::queryPagination()->with('user');
+            $password->where('user_id', $user->id);
+            return $this->paginateResponse($password);
+        } else {
+            return $this->errorResponse('not logged in', 4000);
+        }
     }
 
     /**
@@ -34,11 +34,13 @@ class UserPasswordController extends Controller
      */
     public function decryptPassword($id)
     {
-        $encryptionData = UserPassword::where('id', $id)->first();
-        return response()->json([
-            'data' => [
-                'password' => Crypt::decryptString($encryptionData->password)
-            ],
-        ]);
+        $encryptionData = UserPassword::decryptPassword($id);
+        return $this->modelResponse($encryptionData);
+    }
+
+    public function createPasswordRecord(PasswordCreateRequest $request){
+        $data =$request->validated();
+        
+
     }
 }
